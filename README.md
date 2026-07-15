@@ -149,7 +149,29 @@ python webapp/main.py
 uvicorn webapp.main:app --reload
 ```
 
-Visit `http://127.0.0.1:8000`. Login: `admin@zimsec.ac.zw` / `admin123`.
+Visit `http://127.0.0.1:8000`.
+
+#### Login credentials
+
+The app ships with two demo accounts. These are the default (development) logins:
+
+| Role | Email | Password |
+|---|---|---|
+| Researcher / Admin | `admin@zimsec.ac.zw` | `admin123` |
+| Supervisor | `supervisor@zimsec.ac.zw` | `supervisor2026` |
+
+> **Configuring your own credentials.** Credentials and the session secret are
+> read from environment variables, so you can override the demo defaults without
+> touching the code. Copy `.env.example` to `.env` and set your own values:
+>
+> ```bash
+> cp .env.example .env      # then edit .env
+> ```
+>
+> The available variables are `ADMIN_EMAIL`, `ADMIN_PASSWORD`, `ADMIN_NAME`,
+> `SUPERVISOR_EMAIL`, `SUPERVISOR_PASSWORD`, `SUPERVISOR_NAME`, and
+> `SESSION_SECRET_KEY`. The `.env` file is gitignored and is never committed.
+> If no `.env` is present, the demo defaults above are used.
 
 The dashboard will pick up the new metrics, the new charts, the new SHAP plots,
 and render them under the upgraded editorial UI.
