@@ -1,0 +1,187 @@
+{% extends "base.html" %}
+
+{% block title %}Dashboard — ZIMSEC Analytics{% endblock %}
+{% block page_icon %}grid-1x2-fill{% endblock %}
+{% block page_title %}Dashboard Overview{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <h1>Dashboard Overview</h1>
+    <p>Real-time analytics summary of Zimbabwe's O-Level district performance data</p>
+</div>
+
+<!-- Stats Row -->
+<div class="row g-4 mb-4">
+    <div class="col-lg-3 col-md-6">
+        <div class="stat-card blue">
+            <div class="stat-icon blue"><i class="bi bi-database-fill"></i></div>
+            <div class="stat-value">{{ stats.total_records | default('—') }}</div>
+            <div class="stat-label">Total Records</div>
+        </div>
+    </div>
+    <div class="col-lg-3 col-md-6">
+        <div class="stat-card green">
+            <div class="stat-icon green"><i class="bi bi-geo-alt-fill"></i></div>
+            <div class="stat-value">{{ stats.districts | default('—') }}</div>
+            <div class="stat-label">Districts</div>
+        </div>
+    </div>
+    <div class="col-lg-3 col-md-6">
+        <div class="stat-card orange">
+            <div class="stat-icon orange"><i class="bi bi-graph-up-arrow"></i></div>
+            <div class="stat-value">{{ stats.mean_pass_rate | default('—') }}%</div>
+            <div class="stat-label">Avg. Pass Rate</div>
+        </div>
+    </div>
+    <div class="col-lg-3 col-md-6">
+        <div class="stat-card purple">
+            <div class="stat-icon purple"><i class="bi bi-trophy-fill"></i></div>
+            <div class="stat-value">{{ model_stats.r2 | default('—') }}</div>
+            <div class="stat-label">Model R² Score</div>
+        </div>
+    </div>
+</div>
+
+<!-- Second Row -->
+<div class="row g-4 mb-4">
+    <div class="col-lg-3 col-md-6">
+        <div class="stat-card teal">
+            <div class="stat-icon teal"><i class="bi bi-building"></i></div>
+            <div class="stat-value">{{ stats.urban_rate | default('—') }}%</div>
+            <div class="stat-label">Urban Pass Rate</div>
+        </div>
+    </div>
+    <div class="col-lg-3 col-md-6">
+        <div class="stat-card red">
+            <div class="stat-icon red"><i class="bi bi-tree-fill"></i></div>
+            <div class="stat-value">{{ stats.rural_rate | default('—') }}%</div>
+            <div class="stat-label">Rural Pass Rate</div>
+        </div>
+    </div>
+    <div class="col-lg-3 col-md-6">
+        <div class="stat-card green">
+            <div class="stat-icon green"><i class="bi bi-cpu-fill"></i></div>
+            <div class="stat-value">{{ model_stats.best_model | default('—') }}</div>
+            <div class="stat-label">Best Model</div>
+        </div>
+    </div>
+    <div class="col-lg-3 col-md-6">
+        <div class="stat-card blue">
+            <div class="stat-icon blue"><i class="bi bi-calendar-range"></i></div>
+            <div class="stat-value">{{ stats.year_range | default('—') }}</div>
+            <div class="stat-label">Year Range</div>
+        </div>
+    </div>
+</div>
+
+<!-- Charts Row -->
+<div class="row g-4 mb-4">
+    <div class="col-lg-8">
+        <div class="card-custom">
+            <div class="card-header"><i class="bi bi-graph-up"></i> National Pass Rate Trend</div>
+            <div class="card-body p-2">
+                {% if trend_chart %}
+                <img src="{{ trend_chart }}" alt="Trend Chart" class="w-100 rounded">
+                {% else %}
+                <div class="text-center text-muted py-5">
+                    <i class="bi bi-bar-chart" style="font-size:3rem"></i>
+                    <p class="mt-2">Run the pipeline to generate charts</p>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+    <div class="col-lg-4">
+        <div class="card-custom h-100">
+            <div class="card-header"><i class="bi bi-star-fill"></i> Top Predictors</div>
+            <div class="card-body">
+                {% if top_features %}
+                {% for feat in top_features %}
+                <div class="feature-item">
+                    <span style="font-size:0.85rem; min-width:120px">{{ feat.Feature | replace('_', ' ') | truncate(25)
+                        }}</span>
+                    <div class="feature-bar">
+                        <div class="fill" style="width: {{ (feat.Importance * 100) | round(1) }}%"></div>
+                    </div>
+                    <span style="font-size:0.85rem; font-weight:600; color:var(--accent)">{{ (feat.Importance * 100) |
+                        round(1) }}%</span>
+                </div>
+                {% endfor %}
+                {% else %}
+                <div class="text-center text-muted py-4">
+                    <i class="bi bi-diagram-3" style="font-size:2rem"></i>
+                    <p class="mt-2 mb-0">Run analysis first</p>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Bottom Charts -->
+<div class="row g-4 mb-4">
+    <div class="col-lg-6">
+        <div class="card-custom">
+            <div class="card-header"><i class="bi bi-map-fill"></i> Average Pass Rate by Province</div>
+            <div class="card-body p-2">
+                {% if province_chart %}
+                <img src="{{ province_chart }}" alt="Province Chart" class="w-100 rounded">
+                {% else %}
+                <div class="text-center text-muted py-5">No chart data</div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+    <div class="col-lg-6">
+        <div class="card-custom">
+            <div class="card-header"><i class="bi bi-people-fill"></i> Urban vs Rural Performance</div>
+            <div class="card-body p-2">
+                {% if rural_chart %}
+                <img src="{{ rural_chart }}" alt="Rural Urban Chart" class="w-100 rounded">
+                {% else %}
+                <div class="text-center text-muted py-5">No chart data</div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Model Summary Card -->
+{% if model_stats.best_model %}
+<div class="row g-4">
+    <div class="col-12">
+        <div class="card-custom">
+            <div class="card-header"><i class="bi bi-cpu-fill"></i> Model Performance Summary</div>
+            <div class="card-body">
+                <div class="row text-center">
+                    <div class="col-md-3">
+                        <div class="metric-badge w-100 flex-column">
+                            <div class="label">RMSE</div>
+                            <div class="value text-danger">{{ model_stats.rmse }}</div>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="metric-badge w-100 flex-column">
+                            <div class="label">MAE</div>
+                            <div class="value text-warning">{{ model_stats.mae }}</div>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="metric-badge w-100 flex-column">
+                            <div class="label">R² Score</div>
+                            <div class="value text-success">{{ model_stats.r2 }}</div>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="metric-badge w-100 flex-column">
+                            <div class="label">Best Model</div>
+                            <div class="value text-primary" style="font-size:1.1rem">{{ model_stats.best_model }}</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endif %}
+{% endblock %}

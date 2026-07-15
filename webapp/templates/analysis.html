@@ -1,0 +1,112 @@
+{% extends "base.html" %}
+
+{% block title %}Run Analysis — ZIMSEC Analytics{% endblock %}
+{% block page_icon %}cpu-fill{% endblock %}
+{% block page_title %}Run Analysis{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <h1>Run Analysis Pipeline</h1>
+    <p>Execute data preparation, EDA, and model training on the loaded dataset</p>
+</div>
+
+{% if result %}
+{% if result.success %}
+<div class="alert alert-success alert-custom mb-4" role="alert">
+    <i class="bi bi-check-circle-fill fs-4"></i>
+    <div>
+        <strong>{{ result.message }}</strong>
+        <div style="font-size:0.85rem">Processing time: {{ result.time }} seconds</div>
+    </div>
+</div>
+{% else %}
+<div class="alert alert-danger alert-custom mb-4" role="alert">
+    <i class="bi bi-x-circle-fill fs-4"></i>
+    <div>
+        <strong>Analysis Failed</strong>
+        <div style="font-size:0.85rem">{{ result.message }}</div>
+    </div>
+</div>
+{% endif %}
+{% endif %}
+
+<div class="row g-4">
+    <div class="col-lg-8">
+        <div class="card-custom">
+            <div class="card-header"><i class="bi bi-lightning-charge-fill"></i> Pipeline Execution</div>
+            <div class="card-body text-center py-5">
+                <div style="font-size:5rem; color:var(--accent); margin-bottom:1rem">
+                    <i class="bi bi-cpu-fill"></i>
+                </div>
+                <h3 class="mb-3" style="color:var(--primary)">Ready to Analyse</h3>
+                <p class="text-muted mb-4" style="max-width:500px; margin:0 auto">
+                    Click the button below to run the full data preparation and exploratory
+                    data analysis pipeline. This will process the dataset, clean the data,
+                    generate charts, and prepare for modelling.
+                </p>
+
+                <form method="POST" action="/analysis" id="analysisForm">
+                    <button type="submit" class="btn btn-login" style="max-width:300px">
+                        <i class="bi bi-play-circle-fill me-2"></i> Run Full Analysis
+                    </button>
+                </form>
+
+                {% if model_exists %}
+                <div class="mt-4">
+                    <span class="badge bg-success px-3 py-2">
+                        <i class="bi bi-check-circle me-1"></i> Pre-trained models available
+                    </span>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <div class="col-lg-4">
+        <div class="card-custom mb-4">
+            <div class="card-header"><i class="bi bi-list-check"></i> Pipeline Steps</div>
+            <div class="card-body">
+                <div class="d-flex align-items-center gap-3 mb-3 pb-3 border-bottom">
+                    <div class="stat-icon blue" style="width:36px;height:36px;font-size:0.9rem">1</div>
+                    <div>
+                        <div class="fw-semibold" style="font-size:0.9rem">Data Preparation</div>
+                        <div class="text-muted" style="font-size:0.8rem">Clean, encode, scale features</div>
+                    </div>
+                </div>
+                <div class="d-flex align-items-center gap-3 mb-3 pb-3 border-bottom">
+                    <div class="stat-icon green" style="width:36px;height:36px;font-size:0.9rem">2</div>
+                    <div>
+                        <div class="fw-semibold" style="font-size:0.9rem">Exploratory Analysis</div>
+                        <div class="text-muted" style="font-size:0.8rem">Correlations, trends, distributions</div>
+                    </div>
+                </div>
+                <div class="d-flex align-items-center gap-3 mb-3 pb-3 border-bottom">
+                    <div class="stat-icon orange" style="width:36px;height:36px;font-size:0.9rem">3</div>
+                    <div>
+                        <div class="fw-semibold" style="font-size:0.9rem">Model Training</div>
+                        <div class="text-muted" style="font-size:0.8rem">5 ML models with GridSearchCV</div>
+                    </div>
+                </div>
+                <div class="d-flex align-items-center gap-3">
+                    <div class="stat-icon purple" style="width:36px;height:36px;font-size:0.9rem">4</div>
+                    <div>
+                        <div class="fw-semibold" style="font-size:0.9rem">Interpretation</div>
+                        <div class="text-muted" style="font-size:0.8rem">SHAP values & feature importance</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="card-custom">
+            <div class="card-header"><i class="bi bi-info-circle"></i> Info</div>
+            <div class="card-body">
+                <p class="text-muted mb-0" style="font-size:0.85rem">
+                    The analysis pipeline processes 1,420+ records across 71 districts.
+                    Typical execution time is 60–90 seconds. All results are saved to
+                    the <code>output/</code> directory automatically.
+                </p>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,164 @@
+{% extends "base.html" %}
+
+{% block title %}Upload Data — ZIMSEC Analytics{% endblock %}
+{% block page_icon %}cloud-arrow-up-fill{% endblock %}
+{% block page_title %}Upload Data{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <h1>Upload Data</h1>
+    <p>Upload CSV or JSON datasets for analysis. Files are validated before processing.</p>
+</div>
+
+{% if message %}
+<div class="alert alert-success alert-custom alert-dismissible fade show" role="alert">
+    <i class="bi bi-check-circle-fill"></i> {{ message }}
+    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+</div>
+{% endif %}
+
+{% if error %}
+<div class="alert alert-danger alert-custom alert-dismissible fade show" role="alert">
+    <i class="bi bi-exclamation-triangle-fill"></i> {{ error }}
+    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+</div>
+{% endif %}
+
+<div class="row g-4">
+    <!-- Upload Form -->
+    <div class="col-lg-7">
+        <div class="card-custom">
+            <div class="card-header"><i class="bi bi-upload"></i> Upload File</div>
+            <div class="card-body">
+                <form method="POST" action="/upload" enctype="multipart/form-data">
+                    <div class="mb-4">
+                        <label for="fileType" class="form-label fw-semibold">File Type</label>
+                        <select class="form-select" id="fileType" name="file_type" required>
+                            <option value="csv" selected>CSV (.csv)</option>
+                            <option value="json">JSON (.json)</option>
+                        </select>
+                        <div class="form-text">Select the format matching your data file</div>
+                    </div>
+
+                    <div class="mb-4">
+                        <label for="fileInput" class="form-label fw-semibold">Select File</label>
+                        <div class="upload-zone" onclick="document.getElementById('fileInput').click()">
+                            <i class="bi bi-cloud-arrow-up"></i>
+                            <p class="mb-1 fw-semibold">Click to browse — multiple files supported</p>
+                            <p class="text-muted mb-0" style="font-size:0.85rem">Select one or more files. Multiple CSV files will be merged automatically (up to 50MB each).
+                            </p>
+                        </div>
+                        <input type="file" class="form-control mt-2" id="fileInput" name="files" accept=".csv,.json"
+                            multiple required>
+                    </div>
+
+                    <div class="mb-4">
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" id="removeDups" name="remove_duplicates"
+                                value="1">
+                            <label class="form-check-label" for="removeDups">
+                                <i class="bi bi-funnel me-1"></i> Remove duplicate rows automatically
+                            </label>
+                        </div>
+                    </div>
+
+                    <button type="submit" class="btn btn-login">
+                        <i class="bi bi-cloud-check me-2"></i> Upload & Validate
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Validation Info -->
+    <div class="col-lg-5">
+        <div class="card-custom mb-4">
+            <div class="card-header"><i class="bi bi-shield-fill-check"></i> Validation Rules</div>
+            <div class="card-body">
+                <ul class="list-unstyled mb-0">
+                    <li class="mb-3 d-flex align-items-start gap-2">
+                        <i class="bi bi-check-circle-fill text-success mt-1"></i>
+                        <div>
+                            <strong>File type match</strong>
+                            <div class="text-muted" style="font-size:0.85rem">Selected type must match file extension
+                            </div>
+                        </div>
+                    </li>
+                    <li class="mb-3 d-flex align-items-start gap-2">
+                        <i class="bi bi-check-circle-fill text-success mt-1"></i>
+                        <div>
+                            <strong>Data parsing</strong>
+                            <div class="text-muted" style="font-size:0.85rem">File must be a valid CSV/JSON with proper
+                                structure</div>
+                        </div>
+                    </li>
+                    <li class="mb-3 d-flex align-items-start gap-2">
+                        <i class="bi bi-check-circle-fill text-success mt-1"></i>
+                        <div>
+                            <strong>Null value audit</strong>
+                            <div class="text-muted" style="font-size:0.85rem">Missing values are detected and reported
+                            </div>
+                        </div>
+                    </li>
+                    <li class="d-flex align-items-start gap-2">
+                        <i class="bi bi-check-circle-fill text-success mt-1"></i>
+                        <div>
+                            <strong>Duplicate detection</strong>
+                            <div class="text-muted" style="font-size:0.85rem">Optional removal of duplicate records
+                            </div>
+                        </div>
+                    </li>
+                </ul>
+            </div>
+        </div>
+
+        {% if stats %}
+        <div class="card-custom">
+            <div class="card-header"><i class="bi bi-file-earmark-bar-graph"></i> File Summary</div>
+            <div class="card-body">
+                <table class="table table-sm mb-0">
+                    <tr>
+                        <td class="text-muted">Filename</td>
+                        <td class="fw-semibold">{{ stats.filename }}</td>
+                    </tr>
+                    <tr>
+                        <td class="text-muted">Records</td>
+                        <td class="fw-semibold">{{ stats.records | default(0) }}</td>
+                    </tr>
+                    <tr>
+                        <td class="text-muted">Columns</td>
+                        <td class="fw-semibold">{{ stats.columns | default(0) }}</td>
+                    </tr>
+                    <tr>
+                        <td class="text-muted">File Size</td>
+                        <td class="fw-semibold">{{ stats.size_kb }} KB</td>
+                    </tr>
+                    <tr>
+                        <td class="text-muted">Nulls Found</td>
+                        <td class="fw-semibold">{{ stats.total_nulls }}</td>
+                    </tr>
+                    <tr>
+                        <td class="text-muted">Duplicates Removed</td>
+                        <td class="fw-semibold">{{ stats.duplicates_removed }}</td>
+                    </tr>
+                </table>
+            </div>
+        </div>
+        {% endif %}
+    </div>
+</div>
+
+<!-- Data Preview -->
+{% if preview %}
+<div class="row g-4 mt-2">
+    <div class="col-12">
+        <div class="card-custom">
+            <div class="card-header"><i class="bi bi-table"></i> Data Preview (First 10 Rows)</div>
+            <div class="card-body" style="overflow-x:auto">
+                {{ preview | safe }}
+            </div>
+        </div>
+    </div>
+</div>
+{% endif %}
+{% endblock %}

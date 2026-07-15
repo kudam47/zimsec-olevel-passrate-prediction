@@ -1,0 +1,1106 @@
+/* =============================================================================
+   ZIMSEC O-Level Predictive Analytics — Editorial Academic Stylesheet
+   =============================================================================
+   Design language: Refined editorial / academic luxury.
+   - Typography pair: Newsreader (display serif) + DM Sans (UI sans) + JetBrains Mono.
+   - Palette: deep ink + warm parchment + a single brass accent.
+   - Approach: typography-led, restrained colour, generous whitespace, sharp rules.
+
+   This stylesheet replaces the original style.css. No HTML changes required —
+   it overrides every custom class already used by the existing templates.
+   ========================================================================== */
+
+/* Type imports — variable fonts for performance and weight flexibility */
+@import url('https://fonts.googleapis.com/css2?family=Newsreader:opsz,wght@6..72,400;6..72,500;6..72,600;6..72,700&family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600;9..40,700&family=JetBrains+Mono:wght@400;500;600&display=swap');
+
+/* =============================================================================
+   1. DESIGN TOKENS
+   ========================================================================== */
+:root {
+    /* Palette — restrained editorial */
+    --ink:        #0a1628;   /* primary text, sidebar */
+    --ink-soft:   #1f2e44;   /* secondary headings */
+    --paper:      #faf7f2;   /* page background — warm parchment */
+    --paper-warm: #f1ece1;   /* subtle warm wash */
+    --surface:    #ffffff;   /* card surface */
+    --rule:       #e8e2d4;   /* hairline borders */
+    --rule-soft:  #f0ebde;   /* lighter dividers */
+
+    --muted:      #6b7280;   /* tertiary text */
+    --muted-soft: #9ca3af;
+
+    /* Single accent — warm brass */
+    --accent:        #b45309;
+    --accent-soft:   #d97706;
+    --accent-wash:   #fef3c7;
+
+    /* Status colours — desaturated, editorial */
+    --success:        #166534;
+    --success-wash:   #dcfce7;
+    --danger:         #991b1b;
+    --danger-wash:    #fee2e2;
+    --warning:        #92400e;
+    --warning-wash:   #fef3c7;
+    --info:           #1e40af;
+    --info-wash:      #dbeafe;
+
+    /* Typography */
+    --font-display: 'Newsreader', 'Iowan Old Style', Georgia, serif;
+    --font-sans:    'DM Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+    --font-mono:    'JetBrains Mono', 'SF Mono', Menlo, monospace;
+
+    /* Spacing scale — based on 4px */
+    --sp-1: 0.25rem;
+    --sp-2: 0.5rem;
+    --sp-3: 0.75rem;
+    --sp-4: 1rem;
+    --sp-5: 1.5rem;
+    --sp-6: 2rem;
+    --sp-8: 3rem;
+
+    /* Radius — restrained */
+    --r-sm: 4px;
+    --r-md: 6px;
+    --r-lg: 10px;
+
+    /* Shadow — soft, layered */
+    --shadow-xs: 0 1px 2px rgba(10, 22, 40, 0.04);
+    --shadow-sm: 0 1px 3px rgba(10, 22, 40, 0.06), 0 1px 2px rgba(10, 22, 40, 0.04);
+    --shadow-md: 0 4px 12px rgba(10, 22, 40, 0.06), 0 2px 4px rgba(10, 22, 40, 0.04);
+    --shadow-lg: 0 12px 32px rgba(10, 22, 40, 0.08), 0 4px 8px rgba(10, 22, 40, 0.04);
+
+    /* Layout */
+    --sidebar-w: 260px;
+    --topbar-h:  64px;
+
+    /* Aliases for compatibility with existing templates */
+    --primary:        var(--ink);
+    --text-primary:   var(--ink);
+    --text-secondary: var(--ink-soft);
+    --text-muted:     var(--muted);
+    --bg:             var(--paper);
+}
+
+/* =============================================================================
+   2. RESET & BASE
+   ========================================================================== */
+*, *::before, *::after { box-sizing: border-box; }
+
+html, body {
+    margin: 0;
+    padding: 0;
+    font-family: var(--font-sans);
+    font-size: 15px;
+    line-height: 1.55;
+    color: var(--ink);
+    background: var(--paper);
+    background-image:
+        radial-gradient(circle at 0% 0%, rgba(180, 83, 9, 0.025) 0%, transparent 40%),
+        radial-gradient(circle at 100% 100%, rgba(10, 22, 40, 0.02) 0%, transparent 40%);
+    background-attachment: fixed;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeLegibility;
+}
+
+h1, h2, h3, h4, h5, h6 {
+    font-family: var(--font-display);
+    font-weight: 600;
+    color: var(--ink);
+    letter-spacing: -0.01em;
+    margin: 0 0 var(--sp-3);
+}
+
+h1 { font-size: 2.25rem; line-height: 1.15; letter-spacing: -0.02em; font-weight: 600; }
+h2 { font-size: 1.65rem; line-height: 1.2; }
+h3 { font-size: 1.3rem; line-height: 1.3; }
+h4 { font-size: 1.1rem; line-height: 1.35; font-weight: 600; }
+
+p { margin: 0 0 var(--sp-3); }
+
+a { color: var(--accent); text-decoration: none; transition: color 0.15s; }
+a:hover { color: var(--accent-soft); text-decoration: underline; text-underline-offset: 3px; }
+
+code, pre, .font-mono {
+    font-family: var(--font-mono);
+    font-size: 0.875em;
+}
+
+code {
+    background: var(--paper-warm);
+    color: var(--ink-soft);
+    padding: 0.1em 0.35em;
+    border-radius: var(--r-sm);
+    border: 1px solid var(--rule);
+}
+
+::selection { background: var(--accent-wash); color: var(--ink); }
+
+/* =============================================================================
+   3. SIDEBAR
+   ========================================================================== */
+.sidebar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: var(--sidebar-w);
+    height: 100vh;
+    background: var(--ink);
+    color: rgba(250, 247, 242, 0.85);
+    display: flex;
+    flex-direction: column;
+    z-index: 100;
+    box-shadow: 1px 0 0 rgba(10, 22, 40, 0.05);
+    overflow-y: auto;
+}
+
+/* Subtle top accent stripe */
+.sidebar::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 3px;
+    background: linear-gradient(90deg, var(--accent) 0%, var(--accent-soft) 100%);
+}
+
+.sidebar-brand {
+    padding: var(--sp-6) var(--sp-5) var(--sp-5);
+    display: flex;
+    align-items: center;
+    gap: var(--sp-3);
+    border-bottom: 1px solid rgba(250, 247, 242, 0.08);
+}
+
+.sidebar-brand-icon {
+    width: 40px;
+    height: 40px;
+    display: grid;
+    place-items: center;
+    background: rgba(180, 83, 9, 0.15);
+    color: var(--accent-soft);
+    border-radius: var(--r-md);
+    font-size: 1.25rem;
+    border: 1px solid rgba(180, 83, 9, 0.25);
+}
+
+.sidebar-brand-text {
+    font-family: var(--font-display);
+    font-size: 1.15rem;
+    font-weight: 600;
+    color: var(--paper);
+    line-height: 1.2;
+    letter-spacing: -0.01em;
+}
+
+.sidebar-brand-text small {
+    display: block;
+    font-family: var(--font-sans);
+    font-size: 0.7rem;
+    font-weight: 400;
+    color: rgba(250, 247, 242, 0.5);
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    margin-top: 2px;
+}
+
+.sidebar-nav {
+    flex: 1;
+    padding: var(--sp-4) var(--sp-3);
+}
+
+.sidebar-section-label {
+    padding: var(--sp-4) var(--sp-3) var(--sp-2);
+    font-size: 0.7rem;
+    font-weight: 600;
+    color: rgba(250, 247, 242, 0.45);
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+}
+
+.sidebar .nav-link {
+    display: flex;
+    align-items: center;
+    gap: var(--sp-3);
+    padding: var(--sp-3);
+    color: rgba(250, 247, 242, 0.75);
+    border-radius: var(--r-md);
+    font-size: 0.9rem;
+    font-weight: 500;
+    text-decoration: none;
+    transition: all 0.15s ease;
+    position: relative;
+    margin-bottom: 2px;
+}
+
+.sidebar .nav-link i {
+    font-size: 1rem;
+    width: 18px;
+    color: rgba(250, 247, 242, 0.5);
+    transition: color 0.15s;
+}
+
+.sidebar .nav-link:hover {
+    background: rgba(250, 247, 242, 0.06);
+    color: var(--paper);
+    text-decoration: none;
+}
+
+.sidebar .nav-link:hover i {
+    color: var(--accent-soft);
+}
+
+.sidebar .nav-link.active {
+    background: rgba(180, 83, 9, 0.12);
+    color: var(--paper);
+    box-shadow: inset 2px 0 0 var(--accent-soft);
+}
+
+.sidebar .nav-link.active i { color: var(--accent-soft); }
+
+.sidebar-footer {
+    padding: var(--sp-4) var(--sp-5);
+    border-top: 1px solid rgba(250, 247, 242, 0.08);
+}
+
+.sidebar-user {
+    display: flex;
+    align-items: center;
+    gap: var(--sp-3);
+}
+
+.sidebar-user-avatar {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--accent) 0%, var(--accent-soft) 100%);
+    color: var(--paper);
+    display: grid;
+    place-items: center;
+    font-family: var(--font-display);
+    font-weight: 600;
+    font-size: 0.95rem;
+}
+
+.sidebar-user-info {
+    font-size: 0.85rem;
+    font-weight: 500;
+    color: var(--paper);
+    line-height: 1.25;
+}
+
+.sidebar-user-info small {
+    display: block;
+    font-size: 0.72rem;
+    font-weight: 400;
+    color: rgba(250, 247, 242, 0.5);
+    margin-top: 2px;
+}
+
+/* =============================================================================
+   4. MAIN LAYOUT
+   ========================================================================== */
+.main-content {
+    margin-left: var(--sidebar-w);
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+}
+
+.topbar {
+    height: var(--topbar-h);
+    padding: 0 var(--sp-6);
+    background: rgba(250, 247, 242, 0.85);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border-bottom: 1px solid var(--rule);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    position: sticky;
+    top: 0;
+    z-index: 50;
+}
+
+.topbar-title {
+    display: flex;
+    align-items: center;
+    gap: var(--sp-3);
+    font-family: var(--font-display);
+    font-size: 1.05rem;
+    font-weight: 600;
+    color: var(--ink);
+    letter-spacing: -0.01em;
+}
+
+.topbar-title i { color: var(--accent); font-size: 1.15rem; }
+
+.topbar-right {
+    display: flex;
+    align-items: center;
+    gap: var(--sp-4);
+}
+
+.topbar-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--sp-2);
+    padding: var(--sp-1) var(--sp-3);
+    background: var(--success-wash);
+    color: var(--success);
+    border-radius: 999px;
+    font-size: 0.75rem;
+    font-weight: 500;
+    border: 1px solid rgba(22, 101, 52, 0.15);
+}
+
+.content-area {
+    flex: 1;
+    padding: var(--sp-8) var(--sp-6) var(--sp-6);
+    max-width: 1400px;
+    width: 100%;
+}
+
+.main-footer {
+    padding: var(--sp-5) var(--sp-6);
+    border-top: 1px solid var(--rule);
+    background: var(--paper-warm);
+    color: var(--muted);
+    font-size: 0.78rem;
+    text-align: center;
+    letter-spacing: 0.02em;
+}
+
+.main-footer i { color: var(--accent); margin-right: var(--sp-1); }
+
+/* =============================================================================
+   5. PAGE HEADER
+   ========================================================================== */
+.page-header {
+    margin-bottom: var(--sp-8);
+    padding-bottom: var(--sp-5);
+    border-bottom: 1px solid var(--rule);
+    position: relative;
+}
+
+.page-header::after {
+    content: '';
+    position: absolute;
+    bottom: -1px;
+    left: 0;
+    width: 64px;
+    height: 2px;
+    background: var(--accent);
+}
+
+.page-header h1 {
+    font-size: 2.25rem;
+    margin-bottom: var(--sp-2);
+}
+
+.page-header p {
+    color: var(--muted);
+    font-size: 1rem;
+    margin: 0;
+    max-width: 65ch;
+}
+
+/* =============================================================================
+   6. CARDS
+   ========================================================================== */
+.card-custom {
+    background: var(--surface);
+    border: 1px solid var(--rule);
+    border-radius: var(--r-lg);
+    box-shadow: var(--shadow-xs);
+    overflow: hidden;
+    transition: box-shadow 0.2s, transform 0.2s;
+    height: 100%;
+}
+
+.card-custom:hover {
+    box-shadow: var(--shadow-md);
+}
+
+.card-custom .card-header {
+    padding: var(--sp-4) var(--sp-5);
+    background: transparent;
+    border-bottom: 1px solid var(--rule-soft);
+    font-family: var(--font-display);
+    font-size: 0.95rem;
+    font-weight: 600;
+    color: var(--ink);
+    letter-spacing: -0.005em;
+    display: flex;
+    align-items: center;
+    gap: var(--sp-2);
+}
+
+.card-custom .card-header i {
+    color: var(--accent);
+    font-size: 0.95rem;
+}
+
+.card-custom .card-body {
+    padding: var(--sp-5);
+}
+
+/* =============================================================================
+   7. STAT CARDS — typography-led, restrained colour
+   ========================================================================== */
+.stat-card {
+    background: var(--surface);
+    border: 1px solid var(--rule);
+    border-radius: var(--r-lg);
+    padding: var(--sp-5);
+    box-shadow: var(--shadow-xs);
+    position: relative;
+    overflow: hidden;
+    transition: box-shadow 0.2s, transform 0.2s;
+    height: 100%;
+}
+
+.stat-card:hover {
+    box-shadow: var(--shadow-md);
+    transform: translateY(-1px);
+}
+
+/* Subtle accent rule on the left */
+.stat-card::before {
+    content: '';
+    position: absolute;
+    left: 0; top: 16px; bottom: 16px;
+    width: 3px;
+    background: var(--accent);
+    border-radius: 0 2px 2px 0;
+    opacity: 0.85;
+}
+
+.stat-card.green::before  { background: var(--success); }
+.stat-card.blue::before   { background: var(--info); }
+.stat-card.red::before    { background: var(--danger); }
+.stat-card.orange::before { background: var(--accent); }
+.stat-card.purple::before { background: #6b21a8; }
+.stat-card.teal::before   { background: #0f766e; }
+
+.stat-icon {
+    width: 38px;
+    height: 38px;
+    display: grid;
+    place-items: center;
+    border-radius: var(--r-md);
+    font-size: 1rem;
+    margin-bottom: var(--sp-3);
+    background: var(--paper-warm);
+    color: var(--accent);
+    border: 1px solid var(--rule);
+}
+
+.stat-icon.green  { background: var(--success-wash); color: var(--success); border-color: rgba(22,101,52,0.15); }
+.stat-icon.blue   { background: var(--info-wash);    color: var(--info);    border-color: rgba(30,64,175,0.15); }
+.stat-icon.red    { background: var(--danger-wash);  color: var(--danger);  border-color: rgba(153,27,27,0.15); }
+.stat-icon.orange { background: var(--accent-wash);  color: var(--accent);  border-color: rgba(180,83,9,0.15); }
+.stat-icon.purple { background: #f3e8ff; color: #6b21a8; border-color: rgba(107,33,168,0.15); }
+.stat-icon.teal   { background: #ccfbf1; color: #0f766e; border-color: rgba(15,118,110,0.15); }
+
+.stat-value {
+    font-family: var(--font-display);
+    font-size: 2rem;
+    font-weight: 600;
+    color: var(--ink);
+    line-height: 1.05;
+    letter-spacing: -0.025em;
+    margin-bottom: var(--sp-1);
+    font-variant-numeric: tabular-nums;
+}
+
+.stat-label {
+    font-size: 0.78rem;
+    font-weight: 500;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+}
+
+/* =============================================================================
+   8. METRIC BADGES — for the metrics page
+   ========================================================================== */
+.metric-badge {
+    display: inline-flex;
+    align-items: center;
+    padding: var(--sp-3) var(--sp-4);
+    background: var(--paper-warm);
+    border: 1px solid var(--rule);
+    border-radius: var(--r-md);
+    gap: var(--sp-2);
+}
+
+.metric-badge .label {
+    font-size: 0.72rem;
+    font-weight: 500;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+}
+
+.metric-badge .value {
+    font-family: var(--font-display);
+    font-size: 1.5rem;
+    font-weight: 600;
+    color: var(--ink);
+    line-height: 1.1;
+    font-variant-numeric: tabular-nums;
+}
+
+.metric-badge .value.text-success  { color: var(--success); }
+.metric-badge .value.text-danger   { color: var(--danger); }
+.metric-badge .value.text-warning  { color: var(--warning); }
+.metric-badge .value.text-primary  { color: var(--ink); }
+
+/* =============================================================================
+   9. INFO TOOLTIP DOTS
+   ========================================================================== */
+.info-tooltip {
+    width: 18px;
+    height: 18px;
+    display: inline-grid;
+    place-items: center;
+    background: var(--paper-warm);
+    color: var(--muted);
+    border-radius: 50%;
+    font-size: 0.7rem;
+    font-weight: 600;
+    cursor: help;
+    border: 1px solid var(--rule);
+    transition: all 0.15s;
+}
+
+.info-tooltip:hover {
+    background: var(--accent-wash);
+    color: var(--accent);
+    border-color: var(--accent);
+}
+
+/* =============================================================================
+   10. PROGRESS BARS (custom + bootstrap)
+   ========================================================================== */
+.progress-custom {
+    height: 6px;
+    background: var(--rule-soft);
+    border-radius: 999px;
+    overflow: hidden;
+}
+
+.progress-custom .bar {
+    height: 100%;
+    border-radius: 999px;
+    background: var(--accent);
+    transition: width 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.progress-custom .bar.green  { background: var(--success); }
+.progress-custom .bar.blue   { background: var(--info); }
+.progress-custom .bar.red    { background: var(--danger); }
+.progress-custom .bar.orange { background: var(--accent); }
+
+/* =============================================================================
+   11. FEATURE IMPORTANCE LIST
+   ========================================================================== */
+.feature-item {
+    display: flex;
+    align-items: center;
+    gap: var(--sp-3);
+    padding: var(--sp-3) 0;
+    border-bottom: 1px solid var(--rule-soft);
+}
+
+.feature-item:last-child { border-bottom: none; }
+
+.feature-bar {
+    flex: 1;
+    height: 6px;
+    background: var(--rule-soft);
+    border-radius: 999px;
+    overflow: hidden;
+}
+
+.feature-bar .fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--accent) 0%, var(--accent-soft) 100%);
+    border-radius: 999px;
+    transition: width 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+/* =============================================================================
+   12. BUTTONS
+   ========================================================================== */
+.btn {
+    font-family: var(--font-sans);
+    font-weight: 500;
+    border-radius: var(--r-md);
+    padding: 0.55rem 1.1rem;
+    font-size: 0.9rem;
+    transition: all 0.15s ease;
+    border: 1px solid transparent;
+    letter-spacing: 0.005em;
+}
+
+.btn-login {
+    background: var(--ink);
+    color: var(--paper);
+    border-color: var(--ink);
+    padding: 0.7rem 1.5rem;
+    font-weight: 500;
+    width: 100%;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--sp-2);
+    box-shadow: var(--shadow-sm);
+}
+
+.btn-login:hover {
+    background: var(--ink-soft);
+    border-color: var(--ink-soft);
+    color: var(--paper);
+    transform: translateY(-1px);
+    box-shadow: var(--shadow-md);
+}
+
+.btn-login:active { transform: translateY(0); }
+
+.btn-outline-primary {
+    border-color: var(--ink);
+    color: var(--ink);
+    background: transparent;
+}
+
+.btn-outline-primary:hover {
+    background: var(--ink);
+    border-color: var(--ink);
+    color: var(--paper);
+}
+
+.btn-outline-secondary {
+    border-color: var(--rule);
+    color: var(--ink-soft);
+    background: var(--surface);
+}
+
+.btn-outline-secondary:hover {
+    background: var(--paper-warm);
+    border-color: var(--muted-soft);
+    color: var(--ink);
+}
+
+.btn-sm { padding: 0.35rem 0.75rem; font-size: 0.8rem; }
+
+/* =============================================================================
+   13. FORMS
+   ========================================================================== */
+.form-control, .form-select {
+    font-family: var(--font-sans);
+    font-size: 0.95rem;
+    padding: 0.65rem 0.85rem;
+    border: 1px solid var(--rule);
+    border-radius: var(--r-md);
+    background: var(--surface);
+    color: var(--ink);
+    transition: border-color 0.15s, box-shadow 0.15s;
+}
+
+.form-control:focus, .form-select:focus {
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px rgba(180, 83, 9, 0.12);
+    outline: none;
+}
+
+.form-floating > label {
+    color: var(--muted);
+    font-weight: 500;
+}
+
+.form-label {
+    font-size: 0.85rem;
+    font-weight: 500;
+    color: var(--ink-soft);
+    margin-bottom: var(--sp-2);
+}
+
+.form-text {
+    font-size: 0.8rem;
+    color: var(--muted);
+    margin-top: var(--sp-1);
+}
+
+.form-check-input:checked {
+    background-color: var(--accent);
+    border-color: var(--accent);
+}
+
+.form-range::-webkit-slider-thumb { background: var(--accent); }
+.form-range::-moz-range-thumb     { background: var(--accent); }
+
+/* =============================================================================
+   14. ALERTS
+   ========================================================================== */
+.alert-custom {
+    display: flex;
+    align-items: flex-start;
+    gap: var(--sp-3);
+    padding: var(--sp-4);
+    border-radius: var(--r-md);
+    border: 1px solid;
+    background: var(--surface);
+    font-size: 0.9rem;
+}
+
+.alert-custom i {
+    font-size: 1.25rem;
+    flex-shrink: 0;
+    margin-top: 1px;
+}
+
+.alert-success.alert-custom { background: var(--success-wash); border-color: rgba(22,101,52,0.2); color: var(--success); }
+.alert-danger.alert-custom  { background: var(--danger-wash);  border-color: rgba(153,27,27,0.2); color: var(--danger); }
+.alert-info.alert-custom    { background: var(--info-wash);    border-color: rgba(30,64,175,0.2); color: var(--info); }
+.alert-warning.alert-custom { background: var(--warning-wash); border-color: rgba(146,64,14,0.2); color: var(--warning); }
+
+/* =============================================================================
+   15. UPLOAD ZONE
+   ========================================================================== */
+.upload-zone {
+    border: 2px dashed var(--rule);
+    border-radius: var(--r-lg);
+    padding: var(--sp-8) var(--sp-5);
+    text-align: center;
+    background: var(--paper);
+    color: var(--muted);
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.upload-zone:hover {
+    border-color: var(--accent);
+    background: var(--accent-wash);
+    color: var(--accent);
+}
+
+.upload-zone i {
+    font-size: 2.75rem;
+    color: var(--muted-soft);
+    transition: color 0.2s;
+}
+
+.upload-zone:hover i { color: var(--accent); }
+
+.upload-zone p { margin: var(--sp-3) 0 0; }
+
+/* =============================================================================
+   16. TABLES
+   ========================================================================== */
+.table {
+    font-size: 0.88rem;
+    color: var(--ink);
+    margin-bottom: 0;
+}
+
+.table thead th {
+    background: var(--paper-warm);
+    color: var(--ink-soft);
+    font-weight: 600;
+    font-size: 0.78rem;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    padding: var(--sp-3) var(--sp-4);
+    border-bottom: 1px solid var(--rule);
+    border-top: none;
+}
+
+.table tbody td {
+    padding: var(--sp-3) var(--sp-4);
+    border-color: var(--rule-soft);
+    vertical-align: middle;
+}
+
+.table-hover tbody tr:hover td {
+    background: var(--paper-warm);
+}
+
+.table-sm td, .table-sm th { padding: var(--sp-2) var(--sp-3); font-size: 0.85rem; }
+
+/* Numbers are tabular */
+.table td:not(:first-child) { font-variant-numeric: tabular-nums; }
+
+/* =============================================================================
+   17. BADGES (Bootstrap)
+   ========================================================================== */
+.badge {
+    font-family: var(--font-sans);
+    font-weight: 500;
+    font-size: 0.72rem;
+    padding: 0.3em 0.65em;
+    border-radius: 999px;
+    letter-spacing: 0.02em;
+}
+
+.badge.bg-primary       { background: var(--ink) !important; color: var(--paper) !important; }
+.badge.bg-success       { background: var(--success-wash) !important; color: var(--success) !important; }
+.badge.bg-danger        { background: var(--danger-wash) !important; color: var(--danger) !important; }
+.badge.bg-info          { background: var(--info-wash) !important; color: var(--info) !important; }
+.badge.bg-light         { background: var(--paper-warm) !important; color: var(--ink-soft) !important; border: 1px solid var(--rule); }
+
+/* =============================================================================
+   18. COMPLIANCE PAGE
+   ========================================================================== */
+.compliance-section {
+    background: var(--surface);
+    border: 1px solid var(--rule);
+    border-radius: var(--r-lg);
+    padding: var(--sp-6);
+    margin-bottom: var(--sp-5);
+    box-shadow: var(--shadow-xs);
+}
+
+.compliance-section h4 {
+    font-family: var(--font-display);
+    font-size: 1.2rem;
+    font-weight: 600;
+    color: var(--ink);
+    margin-bottom: var(--sp-4);
+    padding-bottom: var(--sp-3);
+    border-bottom: 1px solid var(--rule-soft);
+    display: flex;
+    align-items: center;
+    gap: var(--sp-3);
+}
+
+.compliance-section h4 i { color: var(--accent); }
+
+.compliance-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--sp-2);
+    padding: var(--sp-1) var(--sp-3);
+    border-radius: 999px;
+    font-size: 0.78rem;
+    font-weight: 500;
+    background: var(--paper-warm);
+    color: var(--ink-soft);
+    border: 1px solid var(--rule);
+}
+
+.compliance-badge.compliant {
+    background: var(--success-wash);
+    color: var(--success);
+    border-color: rgba(22,101,52,0.2);
+}
+
+/* =============================================================================
+   19. SIMULATOR / SCENARIO CARD
+   ========================================================================== */
+.simulator-card {
+    background: linear-gradient(135deg, var(--surface) 0%, var(--paper-warm) 100%);
+    border: 1px solid var(--rule);
+}
+
+.sim-result {
+    background: var(--surface);
+    border: 1px solid var(--rule);
+    border-radius: var(--r-md);
+    padding: var(--sp-4);
+    text-align: center;
+}
+
+.sim-result .label {
+    font-size: 0.72rem;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--muted);
+    margin-bottom: var(--sp-2);
+}
+
+.big-number {
+    font-family: var(--font-display);
+    font-size: 2rem;
+    font-weight: 600;
+    line-height: 1.1;
+    letter-spacing: -0.02em;
+    font-variant-numeric: tabular-nums;
+}
+
+.big-number.positive { color: var(--success); }
+.big-number.negative { color: var(--danger); }
+
+/* =============================================================================
+   20. LOGIN PAGE
+   ========================================================================== */
+.login-wrapper {
+    min-height: 100vh;
+    display: grid;
+    place-items: center;
+    padding: var(--sp-5);
+    background: var(--ink);
+    background-image:
+        radial-gradient(ellipse at top left, rgba(180, 83, 9, 0.12) 0%, transparent 50%),
+        radial-gradient(ellipse at bottom right, rgba(31, 46, 68, 0.5) 0%, transparent 50%);
+    position: relative;
+    overflow: hidden;
+}
+
+/* Decorative editorial rule */
+.login-wrapper::before {
+    content: '';
+    position: absolute;
+    top: var(--sp-6);
+    left: var(--sp-6);
+    right: var(--sp-6);
+    height: 1px;
+    background: linear-gradient(90deg, transparent, rgba(250, 247, 242, 0.15), transparent);
+}
+
+.login-card {
+    background: var(--surface);
+    border-radius: var(--r-lg);
+    padding: var(--sp-8) var(--sp-6);
+    width: 100%;
+    max-width: 420px;
+    box-shadow: var(--shadow-lg);
+    border: 1px solid var(--rule);
+    position: relative;
+    z-index: 2;
+}
+
+.login-card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 24px; right: 24px;
+    height: 3px;
+    background: var(--accent);
+    border-radius: 0 0 2px 2px;
+}
+
+.login-logo {
+    width: 60px;
+    height: 60px;
+    margin: 0 auto var(--sp-5);
+    background: var(--ink);
+    border-radius: var(--r-md);
+    display: grid;
+    place-items: center;
+    color: var(--accent-soft);
+    font-size: 1.6rem;
+    box-shadow: var(--shadow-sm);
+}
+
+.login-card h2 {
+    text-align: center;
+    font-size: 1.6rem;
+    margin-bottom: var(--sp-1);
+    font-weight: 600;
+}
+
+.login-card .subtitle {
+    text-align: center;
+    color: var(--muted);
+    font-size: 0.9rem;
+    margin-bottom: var(--sp-6);
+    font-style: italic;
+    font-family: var(--font-display);
+}
+
+/* =============================================================================
+   21. SPINNER
+   ========================================================================== */
+.spinner-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(10, 22, 40, 0.4);
+    backdrop-filter: blur(6px);
+    -webkit-backdrop-filter: blur(6px);
+    display: none;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    z-index: 9999;
+    gap: var(--sp-4);
+}
+
+.spinner-overlay.active { display: flex; }
+
+.spinner-ring {
+    width: 56px;
+    height: 56px;
+    border: 3px solid rgba(250, 247, 242, 0.2);
+    border-top-color: var(--accent-soft);
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+}
+
+.spinner-overlay > div { color: var(--paper); font-weight: 500; }
+
+@keyframes spin { to { transform: rotate(360deg); } }
+
+/* =============================================================================
+   22. BOOTSTRAP UTILITY OVERRIDES
+   ========================================================================== */
+.text-muted     { color: var(--muted) !important; }
+.text-primary   { color: var(--ink) !important; }
+.text-success   { color: var(--success) !important; }
+.text-danger    { color: var(--danger) !important; }
+.text-warning   { color: var(--warning) !important; }
+.text-info      { color: var(--info) !important; }
+
+.bg-light       { background: var(--paper-warm) !important; }
+.bg-white       { background: var(--surface) !important; }
+
+.border         { border-color: var(--rule) !important; }
+.border-bottom  { border-bottom-color: var(--rule-soft) !important; }
+
+.fw-bold        { font-weight: 600 !important; }
+.fw-semibold    { font-weight: 600 !important; }
+
+/* =============================================================================
+   23. ENTRANCE ANIMATIONS — staggered reveal
+   ========================================================================== */
+@keyframes fade-in-up {
+    from { opacity: 0; transform: translateY(8px); }
+    to   { opacity: 1; transform: translateY(0); }
+}
+
+.content-area > .row > [class*="col-"]:nth-child(1) > * { animation: fade-in-up 0.5s ease-out 0.05s both; }
+.content-area > .row > [class*="col-"]:nth-child(2) > * { animation: fade-in-up 0.5s ease-out 0.1s both; }
+.content-area > .row > [class*="col-"]:nth-child(3) > * { animation: fade-in-up 0.5s ease-out 0.15s both; }
+.content-area > .row > [class*="col-"]:nth-child(4) > * { animation: fade-in-up 0.5s ease-out 0.2s both; }
+
+.page-header { animation: fade-in-up 0.5s ease-out both; }
+
+/* =============================================================================
+   24. RESPONSIVE
+   ========================================================================== */
+@media (max-width: 991px) {
+    .sidebar {
+        transform: translateX(-100%);
+        transition: transform 0.25s ease;
+    }
+    .sidebar.open { transform: translateX(0); }
+    .main-content { margin-left: 0; }
+    .content-area { padding: var(--sp-5) var(--sp-4); }
+    h1 { font-size: 1.75rem; }
+    .stat-value { font-size: 1.6rem; }
+}
+
+@media (max-width: 575px) {
+    .topbar { padding: 0 var(--sp-4); }
+    .content-area { padding: var(--sp-4) var(--sp-3); }
+    .stat-card, .card-custom .card-body { padding: var(--sp-4); }
+}
+
+/* =============================================================================
+   25. PRINT
+   ========================================================================== */
+@media print {
+    .sidebar, .topbar, .main-footer { display: none; }
+    .main-content { margin-left: 0; }
+    .content-area { padding: 0; }
+    .card-custom { box-shadow: none; border: 1px solid var(--rule); break-inside: avoid; }
+}

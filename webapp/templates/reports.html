@@ -1,0 +1,181 @@
+{% extends "base.html" %}
+
+{% block title %}Reports — ZIMSEC Analytics{% endblock %}
+{% block page_icon %}bar-chart-line-fill{% endblock %}
+{% block page_title %}Reports & Analysis{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <h1>Reports & Visualisations</h1>
+    <p>Explore analysis charts, SHAP explanations, and run scenario simulations</p>
+</div>
+
+<!-- Scenario Simulator -->
+<div class="row g-4 mb-4">
+    <div class="col-12">
+        <div class="card-custom simulator-card">
+            <div class="card-header" style="background:transparent"><i class="bi bi-sliders"></i> Scenario Simulator —
+                "What-If" Analysis</div>
+            <div class="card-body">
+                <p class="text-muted mb-3" style="font-size:0.9rem">Adjust indicators below to predict the impact on
+                    pass rates. Values represent % change from the current baseline.</p>
+                <form method="POST" action="/reports/simulate" id="scenarioForm">
+                    <div class="row g-4 mb-4">
+                        <div class="col-md-4">
+                            <label class="form-label fw-semibold">ICT Resource Index <span id="ict_change_val"
+                                    class="text-primary">0%</span></label>
+                            <input type="range" class="form-range" id="ict_change" name="ict_change" min="-50" max="100"
+                                value="0">
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label fw-semibold">Poverty Incidence <span id="poverty_change_val"
+                                    class="text-danger">0%</span></label>
+                            <input type="range" class="form-range" id="poverty_change" name="poverty_change" min="-50"
+                                max="50" value="0">
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label fw-semibold">Pupil-Teacher Ratio <span id="ptr_change_val"
+                                    class="text-warning">0%</span></label>
+                            <input type="range" class="form-range" id="ptr_change" name="ptr_change" min="-50" max="50"
+                                value="0">
+                        </div>
+                    </div>
+                    <button type="submit" class="btn btn-login" style="max-width:250px">
+                        <i class="bi bi-lightning me-1"></i> Simulate Impact
+                    </button>
+                </form>
+
+                {% if sim_result and not sim_result.error %}
+                <div class="row g-3 mt-4">
+                    <div class="col-md-4">
+                        <div class="sim-result">
+                            <div class="label text-muted mb-1">Baseline Prediction</div>
+                            <div class="big-number" style="color:var(--primary)">{{ sim_result.baseline }}%</div>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="sim-result">
+                            <div class="label text-muted mb-1">Scenario Prediction</div>
+                            <div class="big-number {% if sim_result.delta >= 0 %}positive{% else %}negative{% endif %}">
+                                {{ sim_result.scenario }}%
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="sim-result">
+                            <div class="label text-muted mb-1">Predicted Impact</div>
+                            <div class="big-number {% if sim_result.delta >= 0 %}positive{% else %}negative{% endif %}">
+                                {% if sim_result.delta >= 0 %}+{% endif %}{{ sim_result.delta }}%
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                {% elif sim_result and sim_result.error %}
+                <div class="alert alert-danger alert-custom mt-3">
+                    <i class="bi bi-exclamation-triangle"></i> {{ sim_result.error }}
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Analysis Charts -->
+<div class="row g-4 mb-4">
+    {% if figures.get('pass_rate_trends') %}
+    <div class="col-lg-6">
+        <div class="card-custom">
+            <div class="card-header"><i class="bi bi-graph-up"></i> Pass Rate Trends</div>
+            <div class="card-body p-2">
+                <img src="{{ figures.pass_rate_trends }}" alt="Trends" class="w-100 rounded">
+            </div>
+        </div>
+    </div>
+    {% endif %}
+
+    {% if figures.get('correlation_heatmap') %}
+    <div class="col-lg-6">
+        <div class="card-custom">
+            <div class="card-header"><i class="bi bi-grid-3x3"></i> Correlation Matrix</div>
+            <div class="card-body p-2">
+                <img src="{{ figures.correlation_heatmap }}" alt="Correlation" class="w-100 rounded">
+            </div>
+        </div>
+    </div>
+    {% endif %}
+
+    {% if figures.get('urban_rural_comparison') %}
+    <div class="col-lg-6">
+        <div class="card-custom">
+            <div class="card-header"><i class="bi bi-people"></i> Urban vs Rural</div>
+            <div class="card-body p-2">
+                <img src="{{ figures.urban_rural_comparison }}" alt="Urban Rural" class="w-100 rounded">
+            </div>
+        </div>
+    </div>
+    {% endif %}
+
+    {% if figures.get('feature_importance') %}
+    <div class="col-lg-6">
+        <div class="card-custom">
+            <div class="card-header"><i class="bi bi-bar-chart-steps"></i> Feature Importance</div>
+            <div class="card-body p-2">
+                <img src="{{ figures.feature_importance }}" alt="Feature Importance" class="w-100 rounded">
+            </div>
+        </div>
+    </div>
+    {% endif %}
+
+    {% if figures.get('shap_summary') %}
+    <div class="col-12">
+        <div class="card-custom">
+            <div class="card-header"><i class="bi bi-diagram-3"></i> SHAP Summary Analysis</div>
+            <div class="card-body p-2">
+                <img src="{{ figures.shap_summary }}" alt="SHAP" class="w-100 rounded">
+            </div>
+        </div>
+    </div>
+    {% endif %}
+
+    {% if figures.get('model_comparison') %}
+    <div class="col-lg-12">
+        <div class="card-custom">
+            <div class="card-header"><i class="bi bi-trophy"></i> Model Performance Comparison</div>
+            <div class="card-body p-2">
+                <img src="{{ figures.model_comparison }}" alt="Model Comparison" class="w-100 rounded">
+            </div>
+        </div>
+    </div>
+    {% endif %}
+</div>
+
+{% if not figures %}
+<div class="card-custom">
+    <div class="card-body text-center py-5">
+        <i class="bi bi-bar-chart" style="font-size:4rem; color:var(--text-muted)"></i>
+        <h4 class="mt-3" style="color:var(--primary)">No Reports Available</h4>
+        <p class="text-muted">Run the analysis pipeline first to generate charts and reports.</p>
+        <a href="/analysis" class="btn btn-login" style="max-width:200px; display:inline-block">
+            <i class="bi bi-play-circle me-1"></i> Run Analysis
+        </a>
+    </div>
+</div>
+{% endif %}
+
+<!-- Download Section -->
+<div class="row g-4 mt-2">
+    <div class="col-12">
+        <div class="card-custom">
+            <div class="card-header"><i class="bi bi-download"></i> Download Data</div>
+            <div class="card-body">
+                <a href="/download/cleaned_data.csv" class="btn btn-outline-primary me-2">
+                    <i class="bi bi-file-earmark-spreadsheet me-1"></i> Download Cleaned Dataset
+                </a>
+                <a href="/download/zimsec_olevel_district_data.csv" class="btn btn-outline-secondary">
+                    <i class="bi bi-file-earmark-csv me-1"></i> Download Raw Dataset
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

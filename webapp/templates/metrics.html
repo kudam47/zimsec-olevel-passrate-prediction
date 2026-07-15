@@ -1,0 +1,240 @@
+{% extends "base.html" %}
+
+{% block title %}Metrics — ZIMSEC Analytics{% endblock %}
+{% block page_icon %}speedometer2{% endblock %}
+{% block page_title %}Performance Metrics{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <h1>Performance Metrics</h1>
+    <p>Comprehensive model evaluation metrics with academic explanations</p>
+</div>
+
+{% if metrics %}
+<!-- Key Metrics -->
+<div class="row g-4 mb-4">
+    <div class="col-lg-3 col-md-6">
+        <div class="stat-card green">
+            <div class="d-flex justify-content-between align-items-start">
+                <div class="stat-icon green"><i class="bi bi-bullseye"></i></div>
+                <span class="info-tooltip" data-bs-toggle="tooltip"
+                    title="Coefficient of Determination: proportion of variance in the target explained by the model">?</span>
+            </div>
+            <div class="stat-value">{{ metrics.r2 }}</div>
+            <div class="stat-label">R² Score</div>
+            <div class="progress-custom mt-2">
+                <div class="bar green" data-width="{{ (metrics.r2 * 100) | round(0) }}"></div>
+            </div>
+        </div>
+    </div>
+    <div class="col-lg-3 col-md-6">
+        <div class="stat-card blue">
+            <div class="d-flex justify-content-between align-items-start">
+                <div class="stat-icon blue"><i class="bi bi-arrow-down-circle"></i></div>
+                <span class="info-tooltip" data-bs-toggle="tooltip"
+                    title="R² adjusted for the number of predictors in the model — penalises overfitting">?</span>
+            </div>
+            <div class="stat-value">{{ metrics.adj_r2 }}</div>
+            <div class="stat-label">Adjusted R²</div>
+            <div class="progress-custom mt-2">
+                <div class="bar blue" data-width="{{ (metrics.adj_r2 * 100) | round(0) }}"></div>
+            </div>
+        </div>
+    </div>
+    <div class="col-lg-3 col-md-6">
+        <div class="stat-card red">
+            <div class="d-flex justify-content-between align-items-start">
+                <div class="stat-icon red"><i class="bi bi-exclamation-diamond"></i></div>
+                <span class="info-tooltip" data-bs-toggle="tooltip"
+                    title="Root Mean Squared Error: average magnitude of prediction errors (in percentage points)">?</span>
+            </div>
+            <div class="stat-value">{{ metrics.rmse }}</div>
+            <div class="stat-label">RMSE</div>
+        </div>
+    </div>
+    <div class="col-lg-3 col-md-6">
+        <div class="stat-card orange">
+            <div class="d-flex justify-content-between align-items-start">
+                <div class="stat-icon orange"><i class="bi bi-rulers"></i></div>
+                <span class="info-tooltip" data-bs-toggle="tooltip"
+                    title="Mean Absolute Error: average absolute difference between predicted and actual values">?</span>
+            </div>
+            <div class="stat-value">{{ metrics.mae }}</div>
+            <div class="stat-label">MAE</div>
+        </div>
+    </div>
+</div>
+
+<!-- Cross-Validation -->
+<div class="row g-4 mb-4">
+    <div class="col-md-6">
+        <div class="stat-card teal">
+            <div class="d-flex justify-content-between align-items-start">
+                <div class="stat-icon teal"><i class="bi bi-arrow-repeat"></i></div>
+                <span class="info-tooltip" data-bs-toggle="tooltip"
+                    title="Average R² score across 5 cross-validation folds — measures generalisation ability">?</span>
+            </div>
+            <div class="stat-value">{{ metrics.cv_mean }}</div>
+            <div class="stat-label">CV R² (Mean)</div>
+        </div>
+    </div>
+    <div class="col-md-6">
+        <div class="stat-card purple">
+            <div class="d-flex justify-content-between align-items-start">
+                <div class="stat-icon purple"><i class="bi bi-distribute-vertical"></i></div>
+                <span class="info-tooltip" data-bs-toggle="tooltip"
+                    title="Standard deviation of CV R² scores — lower values indicate more stable predictions across folds">?</span>
+            </div>
+            <div class="stat-value">{{ metrics.cv_std }}</div>
+            <div class="stat-label">CV R² (Std Dev)</div>
+        </div>
+    </div>
+</div>
+
+<!-- Academic Explanations -->
+<div class="row g-4 mb-4">
+    <div class="col-12">
+        <div class="card-custom">
+            <div class="card-header"><i class="bi bi-book"></i> Academic Metric Explanations</div>
+            <div class="card-body">
+                <div class="row g-4">
+                    <div class="col-md-6">
+                        <h6 class="fw-bold text-primary"><i class="bi bi-bullseye me-1"></i> R² (Coefficient of
+                            Determination)</h6>
+                        <p class="text-muted" style="font-size:0.9rem">
+                            R² measures the proportion of variance in O-Level pass rates explained by the model's
+                            predictors.
+                            A value of <strong>{{ metrics.r2 }}</strong> means the model explains <strong>{{ (metrics.r2
+                                * 100) | round(1) }}%</strong>
+                            of the variance in district pass rates. Values above 0.85 indicate excellent predictive
+                            power.
+                        </p>
+                    </div>
+                    <div class="col-md-6">
+                        <h6 class="fw-bold text-primary"><i class="bi bi-exclamation-diamond me-1"></i> RMSE (Root Mean
+                            Squared Error)</h6>
+                        <p class="text-muted" style="font-size:0.9rem">
+                            RMSE of <strong>{{ metrics.rmse }}</strong> means the model's predictions are, on average,
+                            within
+                            <strong>{{ metrics.rmse }} percentage points</strong> of the actual pass rate. This
+                            penalises
+                            larger errors more heavily than MAE, making it sensitive to outlier predictions.
+                        </p>
+                    </div>
+                    <div class="col-md-6">
+                        <h6 class="fw-bold text-primary"><i class="bi bi-rulers me-1"></i> MAE (Mean Absolute Error)
+                        </h6>
+                        <p class="text-muted" style="font-size:0.9rem">
+                            MAE of <strong>{{ metrics.mae }}</strong> represents the average absolute prediction error.
+                            Unlike RMSE, MAE treats all errors equally, providing a more interpretable measure of
+                            typical prediction accuracy without amplifying outlier errors.
+                        </p>
+                    </div>
+                    <div class="col-md-6">
+                        <h6 class="fw-bold text-primary"><i class="bi bi-arrow-repeat me-1"></i> Cross-Validation</h6>
+                        <p class="text-muted" style="font-size:0.9rem">
+                            5-fold cross-validation yielded a mean R² of <strong>{{ metrics.cv_mean }}</strong>
+                            (±{{ metrics.cv_std }}). The low standard deviation confirms the model generalises
+                            consistently across different data subsets, reducing overfitting risk.
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Model Comparison Table -->
+{% if comparison_table %}
+<div class="row g-4 mb-4">
+    <div class="col-12">
+        <div class="card-custom">
+            <div class="card-header"><i class="bi bi-table"></i> Model Comparison Table</div>
+            <div class="card-body" style="overflow-x:auto">
+                {{ comparison_table | safe }}
+            </div>
+        </div>
+    </div>
+</div>
+{% endif %}
+
+<!-- Feature Importance Chart -->
+{% if feature_chart %}
+<div class="row g-4 mb-4">
+    <div class="col-12">
+        <div class="card-custom">
+            <div class="card-header"><i class="bi bi-bar-chart-steps"></i> Feature Importance Rankings</div>
+            <div class="card-body p-2">
+                <img src="{{ feature_chart }}" alt="Feature Importance" class="w-100 rounded">
+            </div>
+        </div>
+    </div>
+</div>
+{% endif %}
+
+<!-- Data Quality -->
+{% if data_quality %}
+<div class="row g-4">
+    <div class="col-md-6">
+        <div class="card-custom">
+            <div class="card-header"><i class="bi bi-clipboard-data"></i> Data Quality</div>
+            <div class="card-body">
+                <div class="d-flex justify-content-between mb-3">
+                    <span>Data Completeness</span>
+                    <span class="fw-bold text-success">{{ data_quality.completeness }}%</span>
+                </div>
+                <div class="progress-custom mb-4">
+                    <div class="bar green" data-width="{{ data_quality.completeness }}"></div>
+                </div>
+                <div class="d-flex justify-content-between mb-3">
+                    <span>Duplicate Rate</span>
+                    <span class="fw-bold text-success">{{ data_quality.duplicate_rate }}%</span>
+                </div>
+                <div class="progress-custom">
+                    <div class="bar {% if data_quality.duplicate_rate < 5 %}green{% else %}red{% endif %}"
+                        data-width="{{ data_quality.duplicate_rate }}"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-6">
+        <div class="card-custom">
+            <div class="card-header"><i class="bi bi-database-check"></i> Dataset Summary</div>
+            <div class="card-body">
+                <table class="table table-sm mb-0">
+                    <tr>
+                        <td class="text-muted">Total Records</td>
+                        <td class="fw-bold">{{ data_quality.total_records }}</td>
+                    </tr>
+                    <tr>
+                        <td class="text-muted">Total Features</td>
+                        <td class="fw-bold">{{ data_quality.total_features }}</td>
+                    </tr>
+                    <tr>
+                        <td class="text-muted">Best Model</td>
+                        <td class="fw-bold text-primary">{{ metrics.best_model }}</td>
+                    </tr>
+                    <tr>
+                        <td class="text-muted">Completeness</td>
+                        <td class="fw-bold text-success">{{ data_quality.completeness }}%</td>
+                    </tr>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+{% endif %}
+
+{% else %}
+<div class="card-custom">
+    <div class="card-body text-center py-5">
+        <i class="bi bi-speedometer2" style="font-size:4rem; color:var(--text-muted)"></i>
+        <h4 class="mt-3">No Metrics Available</h4>
+        <p class="text-muted">Run the analysis pipeline to generate performance metrics.</p>
+        <a href="/analysis" class="btn btn-login" style="max-width:200px; display:inline-block">
+            <i class="bi bi-play-circle me-1"></i> Run Analysis
+        </a>
+    </div>
+</div>
+{% endif %}
+{% endblock %}

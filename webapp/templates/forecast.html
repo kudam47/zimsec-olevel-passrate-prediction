@@ -1,0 +1,497 @@
+{% extends "base.html" %}
+
+{% block title %}Forecast — ZIMSEC Analytics{% endblock %}
+{% block page_icon %}graph-up-arrow{% endblock %}
+{% block page_title %}District-Level Forecasting{% endblock %}
+
+{% block head %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+<style>
+    /* Forecast-page-only tweaks for the dashboard layout */
+    .forecast-grid {
+        display: grid;
+        grid-template-columns: 320px 1fr;
+        gap: 1.25rem;
+    }
+    @media (max-width: 991px) {
+        .forecast-grid { grid-template-columns: 1fr; }
+    }
+    .forecast-grid .card-body { padding: 1rem 1.25rem; }
+    .forecast-grid .card-header { padding: 0.75rem 1.25rem; }
+
+    .kpi-strip {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 0.75rem;
+        margin-bottom: 1rem;
+    }
+    @media (max-width: 767px) {
+        .kpi-strip { grid-template-columns: repeat(2, 1fr); }
+    }
+    .kpi-tile {
+        background: var(--surface);
+        border: 1px solid var(--rule);
+        border-radius: var(--r-md);
+        padding: 0.75rem 1rem;
+        position: relative;
+    }
+    .kpi-tile::before {
+        content: '';
+        position: absolute;
+        left: 0; top: 12px; bottom: 12px;
+        width: 3px;
+        background: var(--accent);
+        border-radius: 0 2px 2px 0;
+    }
+    .kpi-tile.success::before { background: var(--success); }
+    .kpi-tile.danger::before  { background: var(--danger); }
+    .kpi-tile.info::before    { background: var(--info); }
+    .kpi-tile .label {
+        font-size: 0.65rem;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.08em;
+        color: var(--muted);
+        margin-bottom: 0.15rem;
+    }
+    .kpi-tile .value {
+        font-family: var(--font-display);
+        font-size: 1.5rem;
+        font-weight: 600;
+        color: var(--ink);
+        line-height: 1.05;
+        font-variant-numeric: tabular-nums;
+    }
+    .kpi-tile .delta {
+        font-size: 0.75rem;
+        font-weight: 500;
+        margin-top: 0.15rem;
+    }
+    .kpi-tile .delta.up   { color: var(--success); }
+    .kpi-tile .delta.down { color: var(--danger); }
+
+    .chart-wrap { position: relative; height: 280px; }
+    .chart-wrap-tall { position: relative; height: 320px; }
+
+    /* Compact form spacing on the control panel */
+    .control-panel .form-label { font-size: 0.78rem; margin-bottom: 0.25rem; font-weight: 600; }
+    .control-panel .mb-3 { margin-bottom: 0.85rem !important; }
+    .control-panel .form-range { padding: 0; margin: 0.1rem 0; }
+    .control-panel .small-label {
+        font-size: 0.7rem; color: var(--muted);
+        display: flex; justify-content: space-between;
+        margin-top: -0.15rem;
+    }
+
+    /* Compact tables on the forecast page */
+    .forecast-table { font-size: 0.82rem; }
+    .forecast-table th {
+        font-size: 0.68rem;
+        text-transform: uppercase;
+        letter-spacing: 0.06em;
+        padding: 0.4rem 0.6rem;
+    }
+    .forecast-table td { padding: 0.4rem 0.6rem; }
+
+    .feat-imp-row {
+        display: flex; align-items: center; gap: 0.5rem;
+        font-size: 0.78rem; padding: 0.25rem 0;
+    }
+    .feat-imp-row .name { flex: 0 0 50%; color: var(--ink-soft); }
+    .feat-imp-row .bar  { flex: 1; height: 5px; background: var(--rule-soft); border-radius: 999px; overflow: hidden; }
+    .feat-imp-row .bar-fill { height: 100%; background: var(--accent); border-radius: 999px; }
+    .feat-imp-row .pct  { flex: 0 0 36px; text-align: right; font-variant-numeric: tabular-nums; color: var(--accent); font-weight: 600; }
+
+    .narrative-box {
+        background: var(--paper-warm);
+        border-left: 3px solid var(--accent);
+        padding: 0.6rem 0.85rem;
+        font-size: 0.85rem;
+        line-height: 1.45;
+        color: var(--ink-soft);
+        border-radius: 0 var(--r-md) var(--r-md) 0;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+
+{% if error %}
+<div class="alert alert-danger alert-custom mb-3">
+    <i class="bi bi-exclamation-triangle-fill"></i>
+    <div><strong>Forecast Error</strong><br><small>{{ error }}</small></div>
+</div>
+{% endif %}
+
+<div class="forecast-grid">
+
+    <!-- ═══════════════════ LEFT: CONTROL PANEL ═══════════════════ -->
+    <form method="POST" action="/forecast" class="control-panel">
+        <div class="card-custom" style="height: 100%;">
+            <div class="card-header"><i class="bi bi-sliders"></i> Forecast Parameters</div>
+            <div class="card-body">
+
+                <div class="mb-3">
+                    <label class="form-label">Province</label>
+                    <select name="province" id="provinceSelect" class="form-select form-select-sm" required>
+                        <option value="">Select Province</option>
+                        {% for prov in provinces %}
+                        <option value="{{ prov }}" {% if selected_province==prov %}selected{% endif %}>{{ prov }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label">District</label>
+                    <select name="district" id="districtSelect" class="form-select form-select-sm" required>
+                        <option value="">Select District</option>
+                        {% if districts_for_province %}
+                            {% for dist in districts_for_province %}
+                            <option value="{{ dist }}" {% if selected_district==dist %}selected{% endif %}>{{ dist }}</option>
+                            {% endfor %}
+                        {% endif %}
+                    </select>
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label">Forecast Start Year</label>
+                    <input type="number" name="start_year" class="form-control form-control-sm"
+                           value="{{ selected_start_year or 2025 }}" min="2024" max="2030">
+                </div>
+
+                <hr style="margin: 0.85rem 0; opacity: 0.5;">
+                <div style="font-size: 0.72rem; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 0.5rem;">
+                    Scenario Adjustments (% change)
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label">Pupil-Teacher Ratio</label>
+                    <input type="range" name="ptr_change" id="ptr_range" class="form-range"
+                           min="-50" max="50" step="5" value="{{ scenario_values.ptr_change or 0 }}">
+                    <div class="small-label"><span>-50%</span><span id="ptr_val" style="color: var(--accent); font-weight: 600;">{{ scenario_values.ptr_change or 0 }}%</span><span>+50%</span></div>
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label">ICT Resources</label>
+                    <input type="range" name="ict_change" id="ict_range" class="form-range"
+                           min="-50" max="100" step="5" value="{{ scenario_values.ict_change or 0 }}">
+                    <div class="small-label"><span>-50%</span><span id="ict_val" style="color: var(--accent); font-weight: 600;">{{ scenario_values.ict_change or 0 }}%</span><span>+100%</span></div>
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label">School Infrastructure</label>
+                    <input type="range" name="infra_change" id="infra_range" class="form-range"
+                           min="-50" max="100" step="5" value="{{ scenario_values.infra_change or 0 }}">
+                    <div class="small-label"><span>-50%</span><span id="infra_val" style="color: var(--accent); font-weight: 600;">{{ scenario_values.infra_change or 0 }}%</span><span>+100%</span></div>
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label">Poverty Incidence</label>
+                    <input type="range" name="poverty_change" id="poverty_range" class="form-range"
+                           min="-50" max="50" step="5" value="{{ scenario_values.poverty_change or 0 }}">
+                    <div class="small-label"><span>-50%</span><span id="poverty_val" style="color: var(--accent); font-weight: 600;">{{ scenario_values.poverty_change or 0 }}%</span><span>+50%</span></div>
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label">Avg Household Income</label>
+                    <input type="range" name="income_change" id="income_range" class="form-range"
+                           min="-50" max="100" step="5" value="{{ scenario_values.income_change or 0 }}">
+                    <div class="small-label"><span>-50%</span><span id="income_val" style="color: var(--accent); font-weight: 600;">{{ scenario_values.income_change or 0 }}%</span><span>+100%</span></div>
+                </div>
+
+                <button type="submit" class="btn btn-login" style="width: 100%; padding: 0.55rem;">
+                    <i class="bi bi-arrow-right-circle me-2"></i>Generate Forecast
+                </button>
+            </div>
+        </div>
+    </form>
+
+    <!-- ═══════════════════ RIGHT: RESULTS DASHBOARD ═══════════════════ -->
+    <div>
+        {% if not result %}
+        <!-- Empty state -->
+        <div class="card-custom" style="height: 100%; min-height: 500px; display: flex; align-items: center; justify-content: center;">
+            <div style="text-align: center; padding: 2rem; max-width: 480px;">
+                <div style="font-size: 4rem; color: var(--muted-soft); margin-bottom: 1rem;">
+                    <i class="bi bi-graph-up-arrow"></i>
+                </div>
+                <h3 style="margin-bottom: 0.5rem;">Ready to Forecast</h3>
+                <p style="color: var(--muted); margin-bottom: 0;">
+                    Select a province and district from the control panel to generate
+                    a 5-year pass-rate projection with scenario simulation.
+                </p>
+            </div>
+        </div>
+        {% else %}
+
+        <!-- KPI Strip -->
+        {% set total_change = result.baseline_forecast[-1].Predicted_Pass_Rate - result.last_observed_rate %}
+        <div class="kpi-strip">
+            <div class="kpi-tile info">
+                <div class="label">Last Observed</div>
+                <div class="value">{{ result.last_observed_rate }}%</div>
+                <div class="delta" style="color: var(--muted);">{{ result.start_year - 1 }}</div>
+            </div>
+            <div class="kpi-tile">
+                <div class="label">Projected {{ result.end_year }}</div>
+                <div class="value">{{ result.baseline_forecast[-1].Predicted_Pass_Rate }}%</div>
+                <div class="delta {{ 'up' if total_change >= 0 else 'down' }}">
+                    {{ '%+.1f' | format(total_change) }} pp vs {{ result.start_year - 1 }}
+                </div>
+            </div>
+            {% if result.scenario_forecast and result.delta_summary %}
+            <div class="kpi-tile {{ 'success' if result.delta_summary.improvement >= 0 else 'danger' }}">
+                <div class="label">Scenario {{ result.end_year }}</div>
+                <div class="value">{{ result.delta_summary.scenario_end }}%</div>
+                <div class="delta {{ 'up' if result.delta_summary.improvement >= 0 else 'down' }}">
+                    {{ '%+.1f' | format(result.delta_summary.improvement) }} pp vs baseline
+                </div>
+            </div>
+            {% else %}
+            <div class="kpi-tile">
+                <div class="label">Scenario</div>
+                <div class="value" style="font-size: 1rem; color: var(--muted); padding-top: 0.5rem;">No adjustment set</div>
+            </div>
+            {% endif %}
+            <div class="kpi-tile">
+                <div class="label">Model</div>
+                <div class="value" style="font-size: 1.1rem;">{{ result.metrics.model_name if result.metrics else '—' }}</div>
+                <div class="delta" style="color: var(--muted);">R² = {{ result.metrics.r2 if result.metrics else '—' }}</div>
+            </div>
+        </div>
+
+        <!-- Main Chart + Forecast Table side-by-side -->
+        <div class="row g-3 mb-3">
+            <div class="col-xl-8">
+                <div class="card-custom">
+                    <div class="card-header">
+                        <i class="bi bi-graph-up"></i>
+                        Pass Rate Projection — {{ result.district }}, {{ result.province }}
+                    </div>
+                    <div class="card-body">
+                        <div class="chart-wrap-tall">
+                            <canvas id="forecastChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-xl-4">
+                <div class="card-custom" style="height: 100%;">
+                    <div class="card-header"><i class="bi bi-table"></i> 5-Year Forecast</div>
+                    <div class="card-body" style="padding: 0;">
+                        <table class="table forecast-table mb-0">
+                            <thead>
+                                <tr>
+                                    <th>Year</th>
+                                    <th>Pred</th>
+                                    <th>95% CI</th>
+                                    <th>Δ</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for row in result.baseline_forecast %}
+                                <tr>
+                                    <td><strong>{{ row.Year }}</strong></td>
+                                    <td><span style="color: var(--accent); font-weight: 600;">{{ row.Predicted_Pass_Rate }}%</span></td>
+                                    <td style="color: var(--muted); font-size: 0.72rem;">{{ row.Lower_CI }}–{{ row.Upper_CI }}</td>
+                                    <td>
+                                        {% if row.Change_Pct > 0 %}
+                                        <span class="text-success" style="font-size: 0.78rem;"><i class="bi bi-arrow-up"></i>{{ '%+.1f' | format(row.Change_Pct) }}</span>
+                                        {% elif row.Change_Pct < 0 %}
+                                        <span class="text-danger" style="font-size: 0.78rem;"><i class="bi bi-arrow-down"></i>{{ '%+.1f' | format(row.Change_Pct) }}</span>
+                                        {% else %}
+                                        <span style="color: var(--muted); font-size: 0.78rem;">—</span>
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Narrative + Feature Importance side-by-side -->
+        <div class="row g-3">
+            <div class="col-xl-7">
+                <div class="card-custom">
+                    <div class="card-header"><i class="bi bi-lightbulb"></i> Insight Summary</div>
+                    <div class="card-body">
+                        <div class="narrative-box">{{ result.narrative }}</div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-xl-5">
+                <div class="card-custom">
+                    <div class="card-header"><i class="bi bi-bar-chart-steps"></i> Top Drivers</div>
+                    <div class="card-body" style="padding: 0.6rem 1.25rem 0.85rem;">
+                        {% if result.feature_importances %}
+                            {% set max_imp = result.feature_importances[0].Importance %}
+                            {% for f in result.feature_importances[:6] %}
+                            <div class="feat-imp-row">
+                                <span class="name">{{ f.Feature | replace('_', ' ') | truncate(28) }}</span>
+                                <span class="bar"><span class="bar-fill" style="width: {{ (f.Importance / max_imp * 100) | round(1) }}%;"></span></span>
+                                <span class="pct">{{ (f.Importance * 100) | round(1) }}%</span>
+                            </div>
+                            {% endfor %}
+                        {% else %}
+                            <p style="color: var(--muted); font-size: 0.85rem;">No feature importance data available.</p>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        {% endif %}
+    </div>
+</div>
+
+{% endblock %}
+
+{% block scripts %}
+<script>
+(function () {
+    // Province → district cascading dropdown
+    const provincesDistricts = {{ provinces_districts | tojson | safe }};
+    const provSel = document.getElementById('provinceSelect');
+    const distSel = document.getElementById('districtSelect');
+
+    if (provSel && distSel) {
+        provSel.addEventListener('change', function () {
+            const districts = provincesDistricts[this.value] || [];
+            distSel.innerHTML = '<option value="">Select District</option>' +
+                districts.map(d => `<option value="${d}">${d}</option>`).join('');
+        });
+    }
+
+    // Live update of slider value labels
+    ['ptr', 'ict', 'infra', 'poverty', 'income'].forEach(name => {
+        const range = document.getElementById(name + '_range');
+        const label = document.getElementById(name + '_val');
+        if (range && label) {
+            range.addEventListener('input', () => {
+                const v = parseInt(range.value);
+                label.textContent = (v >= 0 ? '+' : '') + v + '%';
+            });
+        }
+    });
+
+    {% if result %}
+    // Build the forecast chart
+    const historical = {{ result.historical | tojson | safe }};
+    const baseline   = {{ result.baseline_forecast | tojson | safe }};
+    const scenario   = {{ (result.scenario_forecast or []) | tojson | safe }};
+
+    const allYears   = [...historical.map(h => h.Year), ...baseline.map(b => b.Year)];
+    const histVals   = historical.map(h => h.Pass_Rate_Pct);
+    // Pad historical with nulls in forecast years; pad forecast with nulls in historical years
+    const histPadded = [...histVals, ...baseline.map(_ => null)];
+    const baseVals   = [...historical.map(_ => null), ...baseline.map(b => b.Predicted_Pass_Rate)];
+    const scenVals   = scenario.length
+        ? [...historical.map(_ => null), ...scenario.map(s => s.Predicted_Pass_Rate)]
+        : [];
+    const ciLow      = [...historical.map(_ => null), ...baseline.map(b => b.Lower_CI)];
+    const ciHigh     = [...historical.map(_ => null), ...baseline.map(b => b.Upper_CI)];
+
+    const datasets = [
+        {
+            label: 'Historical',
+            data: histPadded,
+            borderColor: '#1e40af',
+            backgroundColor: '#1e40af',
+            borderWidth: 2.5,
+            pointRadius: 4,
+            pointBackgroundColor: '#1e40af',
+            tension: 0.3,
+        },
+        {
+            label: 'Forecast',
+            data: baseVals,
+            borderColor: '#b45309',
+            backgroundColor: '#b45309',
+            borderWidth: 2.5,
+            borderDash: [4, 4],
+            pointRadius: 4,
+            pointBackgroundColor: '#b45309',
+            tension: 0.3,
+        },
+        {
+            label: '95% CI',
+            data: ciHigh,
+            borderColor: 'transparent',
+            backgroundColor: 'rgba(180, 83, 9, 0.12)',
+            fill: '+1',
+            pointRadius: 0,
+        },
+        {
+            label: '_lower',
+            data: ciLow,
+            borderColor: 'transparent',
+            backgroundColor: 'transparent',
+            fill: false,
+            pointRadius: 0,
+            showLine: false,
+        }
+    ];
+
+    if (scenVals.length) {
+        datasets.push({
+            label: 'Scenario',
+            data: scenVals,
+            borderColor: '#16a34a',
+            backgroundColor: '#16a34a',
+            borderWidth: 2.5,
+            borderDash: [2, 3],
+            pointRadius: 4,
+            pointBackgroundColor: '#16a34a',
+            tension: 0.3,
+        });
+    }
+
+    new Chart(document.getElementById('forecastChart'), {
+        type: 'line',
+        data: { labels: allYears, datasets: datasets },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            interaction: { intersect: false, mode: 'index' },
+            plugins: {
+                legend: {
+                    position: 'top',
+                    labels: {
+                        font: { size: 11, family: 'DM Sans' },
+                        boxWidth: 12,
+                        padding: 12,
+                        filter: (item) => !item.text.startsWith('_'),
+                    }
+                },
+                tooltip: {
+                    backgroundColor: '#0a1628',
+                    padding: 10,
+                    titleFont: { family: 'DM Sans', weight: '600' },
+                    bodyFont: { family: 'DM Sans' },
+                    callbacks: {
+                        label: (ctx) => {
+                            if (ctx.dataset.label.startsWith('_')) return null;
+                            return ctx.dataset.label + ': ' + (ctx.parsed.y !== null ? ctx.parsed.y.toFixed(1) + '%' : '–');
+                        }
+                    }
+                }
+            },
+            scales: {
+                y: {
+                    title: { display: true, text: 'Pass Rate (%)', font: { family: 'DM Sans', size: 11 } },
+                    ticks: { font: { family: 'DM Sans', size: 10 } },
+                },
+                x: {
+                    title: { display: true, text: 'Year', font: { family: 'DM Sans', size: 11 } },
+                    ticks: { font: { family: 'DM Sans', size: 10 } },
+                }
+            }
+        }
+    });
+    {% endif %}
+})();
+</script>
+{% endblock %}

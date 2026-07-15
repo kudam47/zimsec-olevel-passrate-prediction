@@ -1,0 +1,182 @@
+{% extends "base.html" %}
+
+{% block title %}Compliance — ZIMSEC Analytics{% endblock %}
+{% block page_icon %}shield-check{% endblock %}
+{% block page_title %}Compliance & Governance{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <h1>Compliance & Data Governance</h1>
+    <p>Regulatory compliance, ethical AI practices, and data protection policies</p>
+</div>
+
+<!-- Compliance Status -->
+<div class="row g-4 mb-4">
+    <div class="col-md-4">
+        <div class="stat-card green">
+            <div class="stat-icon green"><i class="bi bi-shield-fill-check"></i></div>
+            <div class="stat-value" style="font-size:1.2rem">Compliant</div>
+            <div class="stat-label">Zimbabwe Cyber & Data Protection Act</div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="stat-card blue">
+            <div class="stat-icon blue"><i class="bi bi-lock-fill"></i></div>
+            <div class="stat-value" style="font-size:1.2rem">No PII</div>
+            <div class="stat-label">Personal Data Storage</div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="stat-card purple">
+            <div class="stat-icon purple"><i class="bi bi-mortarboard-fill"></i></div>
+            <div class="stat-value" style="font-size:1.2rem">Research Only</div>
+            <div class="stat-label">Usage Classification</div>
+        </div>
+    </div>
+</div>
+
+<!-- Section 1: Legal Framework -->
+<div class="compliance-section">
+    <h4><i class="bi bi-bank"></i> Zimbabwe Cyber and Data Protection Act (2021)</h4>
+    <div class="compliance-badge compliant mb-3">
+        <i class="bi bi-check-circle-fill"></i> Fully Compliant
+    </div>
+    <p style="font-size:0.95rem; line-height:1.8">
+        This system operates in full compliance with the Zimbabwe Cyber and Data Protection Act of 2021
+        (Chapter 12:07). The Act regulates the processing of personal data and establishes the Postal and
+        Telecommunications Regulatory Authority of Zimbabwe (POTRAZ) as the supervising authority.
+    </p>
+    <p style="font-size:0.95rem; line-height:1.8">
+        The system processes only <strong>aggregated district-level data</strong> and does not collect,
+        store, or process any personally identifiable information (PII) of individual students, teachers,
+        or community members.
+    </p>
+</div>
+
+<!-- Section 2: Data Anonymisation -->
+<div class="compliance-section">
+    <h4><i class="bi bi-eye-slash-fill"></i> Data Anonymisation Policy</h4>
+    <div class="compliance-badge compliant mb-3">
+        <i class="bi bi-check-circle-fill"></i> Anonymised at Source
+    </div>
+    <ul style="font-size:0.95rem; line-height:2">
+        <li>All data is aggregated at the <strong>district level</strong> — no individual records exist</li>
+        <li>Student names, registration numbers, and personal details are <strong>never collected</strong></li>
+        <li>Teacher identities and employment details are <strong>not stored</strong> in the system</li>
+        <li>Geographic data is limited to district and province names — no GPS coordinates or addresses</li>
+        <li>Data cannot be reverse-engineered to identify individuals due to aggregation levels</li>
+    </ul>
+</div>
+
+<!-- Section 3: No PII -->
+<div class="compliance-section">
+    <h4><i class="bi bi-person-lock"></i> No Personally Identifiable Information (PII)</h4>
+    <div class="compliance-badge compliant mb-3">
+        <i class="bi bi-check-circle-fill"></i> Zero PII Storage
+    </div>
+    <div class="row g-4">
+        <div class="col-md-6">
+            <h6 class="fw-bold text-success">Data We Process:</h6>
+            <ul style="font-size:0.9rem; line-height:1.8">
+                <li>District-level pass rate percentages</li>
+                <li>Aggregate pupil-teacher ratios</li>
+                <li>Provincial socioeconomic indicators</li>
+                <li>Resource availability indices</li>
+                <li>Temporal examination statistics</li>
+            </ul>
+        </div>
+        <div class="col-md-6">
+            <h6 class="fw-bold text-danger">Data We DO NOT Process:</h6>
+            <ul style="font-size:0.9rem; line-height:1.8">
+                <li><s>Student names or ID numbers</s></li>
+                <li><s>Individual examination results</s></li>
+                <li><s>Home addresses or contact details</s></li>
+                <li><s>Biometric or health data</s></li>
+                <li><s>Financial records of individuals</s></li>
+            </ul>
+        </div>
+    </div>
+</div>
+
+<!-- Section 4: Responsible AI -->
+<div class="compliance-section">
+    <h4><i class="bi bi-robot"></i> Responsible AI Disclaimer</h4>
+    <div class="compliance-badge compliant mb-3">
+        <i class="bi bi-check-circle-fill"></i> Ethical AI Framework Applied
+    </div>
+    <p style="font-size:0.95rem; line-height:1.8">This system follows responsible AI principles:</p>
+    <div class="row g-3">
+        <div class="col-md-6">
+            <div class="d-flex gap-2 mb-3">
+                <i class="bi bi-check-circle-fill text-success mt-1"></i>
+                <div>
+                    <strong>Transparency</strong>
+                    <div class="text-muted" style="font-size:0.85rem">All model architectures, parameters, and decision
+                        logic are fully documented and open to audit</div>
+                </div>
+            </div>
+            <div class="d-flex gap-2 mb-3">
+                <i class="bi bi-check-circle-fill text-success mt-1"></i>
+                <div>
+                    <strong>Interpretability</strong>
+                    <div class="text-muted" style="font-size:0.85rem">SHAP values provide transparent explanations for
+                        every prediction made by the system</div>
+                </div>
+            </div>
+            <div class="d-flex gap-2">
+                <i class="bi bi-check-circle-fill text-success mt-1"></i>
+                <div>
+                    <strong>Fairness</strong>
+                    <div class="text-muted" style="font-size:0.85rem">Predictions are evaluated for urban/rural bias;
+                        scenario tools promote equitable resource allocation</div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="d-flex gap-2 mb-3">
+                <i class="bi bi-check-circle-fill text-success mt-1"></i>
+                <div>
+                    <strong>Human Oversight</strong>
+                    <div class="text-muted" style="font-size:0.85rem">Model outputs are decision-support tools — all
+                        policy decisions require human judgement and review</div>
+                </div>
+            </div>
+            <div class="d-flex gap-2 mb-3">
+                <i class="bi bi-check-circle-fill text-success mt-1"></i>
+                <div>
+                    <strong>Accountability</strong>
+                    <div class="text-muted" style="font-size:0.85rem">Limitations are clearly documented; the system is
+                        not a substitute for educational expertise</div>
+                </div>
+            </div>
+            <div class="d-flex gap-2">
+                <i class="bi bi-check-circle-fill text-success mt-1"></i>
+                <div>
+                    <strong>Reproducibility</strong>
+                    <div class="text-muted" style="font-size:0.85rem">Complete codebase and data pipelines enable full
+                        reproduction of all results</div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Section 5: Research Notice -->
+<div class="compliance-section">
+    <h4><i class="bi bi-journal-bookmark-fill"></i> Research-Only Usage Notice</h4>
+    <div class="alert alert-info alert-custom mt-3">
+        <i class="bi bi-info-circle-fill fs-5"></i>
+        <div>
+            <strong>Academic Research Only</strong><br>
+            This system was developed as part of an undergraduate research project and is intended
+            exclusively for academic demonstration, research, and educational purposes. It should not
+            be used as the sole basis for governmental policy decisions without additional validation
+            using official ZIMSEC data and expert review.
+        </div>
+    </div>
+    <p style="font-size:0.85rem; color:var(--text-muted); margin-top:1rem">
+        <i class="bi bi-calendar me-1"></i> Last compliance review: February 2026 |
+        <i class="bi bi-person me-1"></i> Reviewed by: Cesario Machinga (Principal Researcher)
+    </p>
+</div>
+{% endblock %}
