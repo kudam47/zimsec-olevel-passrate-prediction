@@ -22,7 +22,12 @@ import uvicorn
 import numpy as np
 import pandas as pd
 import joblib
+from dotenv import load_dotenv
 import matplotlib
+
+# Load environment variables from a local .env file (if present).
+# .env is gitignored — never commit real secrets to the repository.
+load_dotenv()
 # Multi-glob ingestion: combines master file + uploaded files automatically
 from ingestion import ingest_multi_glob, build_default_patterns, REQUIRED_COLS, DEDUP_KEYS
 matplotlib.use('Agg')
@@ -48,21 +53,35 @@ UPLOAD_DIR.mkdir(parents=True, exist_ok=True)
 
 # ─── App Setup ───────────────────────────────────────────────────────────
 app = FastAPI(title="ZIMSEC O-Level Analytics", version="1.0.0")
-app.add_middleware(SessionMiddleware, secret_key="zimsec-analytics-secret-key-2026")
+app.add_middleware(
+    SessionMiddleware,
+    secret_key=os.environ.get("SESSION_SECRET_KEY", "dev-only-insecure-secret-change-me"),
+)
 app.mount("/static", StaticFiles(directory=str(WEBAPP_DIR / "static")), name="static")
 app.mount("/output", StaticFiles(directory=str(OUTPUT_DIR)), name="output")
 templates = Jinja2Templates(directory=str(WEBAPP_DIR / "templates"))
 
 # ─── Auth Config ─────────────────────────────────────────────────────────
+# Credentials are read from environment variables (see .env.example). The
+# fallback values are development-only defaults — set real values in a local
+# .env file (which is gitignored) before deploying anywhere public.
+ADMIN_EMAIL = os.environ.get("ADMIN_EMAIL", "admin@zimsec.ac.zw")
+ADMIN_PASSWORD = os.environ.get("ADMIN_PASSWORD", "admin123")
+ADMIN_NAME = os.environ.get("ADMIN_NAME", "Cesario Machinga")
+
+SUPERVISOR_EMAIL = os.environ.get("SUPERVISOR_EMAIL", "supervisor@zimsec.ac.zw")
+SUPERVISOR_PASSWORD = os.environ.get("SUPERVISOR_PASSWORD", "supervisor2026")
+SUPERVISOR_NAME = os.environ.get("SUPERVISOR_NAME", "Dr. Supervisor")
+
 USERS = {
-    "admin@zimsec.ac.zw": {
-        "password": hashlib.sha256("admin123".encode()).hexdigest(),
-        "name": "Cesario Machinga",
+    ADMIN_EMAIL: {
+        "password": hashlib.sha256(ADMIN_PASSWORD.encode()).hexdigest(),
+        "name": ADMIN_NAME,
         "role": "Researcher"
     },
-    "supervisor@zimsec.ac.zw": {
-        "password": hashlib.sha256("supervisor2026".encode()).hexdigest(),
-        "name": "Dr. Supervisor",
+    SUPERVISOR_EMAIL: {
+        "password": hashlib.sha256(SUPERVISOR_PASSWORD.encode()).hexdigest(),
+        "name": SUPERVISOR_NAME,
         "role": "Supervisor"
     }
 }

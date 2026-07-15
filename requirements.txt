@@ -39,6 +39,7 @@ uvicorn[standard]>=0.24
 jinja2>=3.1
 python-multipart>=0.0.6
 itsdangerous>=2.1
+python-dotenv>=1.0
 
 # --- Model persistence -------------------------------------------------------
 joblib>=1.3
